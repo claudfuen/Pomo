@@ -43,7 +43,7 @@ jobs:
           KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
           # Decode certificate from base64
-          echo "$CERTIFICATE_P12" | base64 -D > $CERTIFICATE_PATH
+          printf '%s' "$CERTIFICATE_P12" | base64 -D > $CERTIFICATE_PATH
 
           # Create temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
