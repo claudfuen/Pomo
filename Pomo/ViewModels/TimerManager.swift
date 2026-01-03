@@ -148,12 +148,6 @@ class TimerManager: ObservableObject {
         selectedDuration = minutes
     }
     
-    func addMinute() {
-        // Add 60 seconds to both total and remaining
-        totalSeconds += 60
-        remainingSeconds += 60
-    }
-    
     // MARK: - Private Methods
     private func startTimer() {
         timer = Timer.publish(every: 1, on: .main, in: .common)
