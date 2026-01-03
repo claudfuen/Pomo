@@ -1,15 +1,17 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
 
-export async function checkPomoInstallation(showErrorToast = true): Promise<boolean> {
+export async function checkPomoInstallation(
+  showErrorToast = true,
+): Promise<boolean> {
   const applications = await getApplications();
   const pomoApp = applications.find((app) => app.bundleId === "com.pomo.app");
 
   if (pomoApp) {
     return true;
   }
-  
+
   // NOTE: For debugging locally with Xcode, return true if needed
-  // return true; 
+  // return true;
 
   if (showErrorToast) {
     await showToast({
@@ -24,6 +26,6 @@ export async function checkPomoInstallation(showErrorToast = true): Promise<bool
       },
     });
   }
-  
+
   return false;
 }
