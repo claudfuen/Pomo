@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: macos-latest
@@ -124,9 +127,9 @@ EOF
 )
           
           # Insert new item after the comment block (before existing items)
-          # Using awk to insert after the --> line
+          # Using awk to insert after lines ending with -->
           awk -v new_item="$NEW_ITEM" '
-            /^[[:space:]]*-->/ { print; print ""; print new_item; next }
+            /-->$/ { print; print ""; print new_item; next }
             { print }
           ' appcast.xml > appcast_new.xml
           
