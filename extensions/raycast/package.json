@@ -12,48 +12,56 @@
     {
       "name": "start-5",
       "title": "Start 5 Minutes",
+      "subtitle": "Pomo",
       "description": "Start a 5 minute timer",
       "mode": "no-view"
     },
     {
       "name": "start-10",
       "title": "Start 10 Minutes",
+      "subtitle": "Pomo",
       "description": "Start a 10 minute timer",
       "mode": "no-view"
     },
     {
       "name": "start-15",
       "title": "Start 15 Minutes",
+      "subtitle": "Pomo",
       "description": "Start a 15 minute timer",
       "mode": "no-view"
     },
     {
       "name": "start-25",
       "title": "Start 25 Minutes",
+      "subtitle": "Pomo",
       "description": "Start a 25 minute timer",
       "mode": "no-view"
     },
     {
       "name": "start-45",
       "title": "Start 45 Minutes",
+      "subtitle": "Pomo",
       "description": "Start a 45 minute timer",
       "mode": "no-view"
     },
     {
       "name": "toggle-timer",
       "title": "Toggle Timer",
+      "subtitle": "Pomo",
       "description": "Toggle timer state (start/pause/resume)",
       "mode": "no-view"
     },
     {
       "name": "pause-timer",
       "title": "Pause Timer",
+      "subtitle": "Pomo",
       "description": "Pause the running timer",
       "mode": "no-view"
     },
     {
       "name": "reset-timer",
       "title": "Reset Timer",
+      "subtitle": "Pomo",
       "description": "Reset timer to idle state",
       "mode": "no-view"
     }

@@ -29,4 +29,3 @@ export async function checkPomoInstallation(): Promise<boolean> {
 
   return isInstalled;
 }
-
