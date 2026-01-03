@@ -22,6 +22,7 @@
 		015 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 200; };
 		016 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 201; };
 		017 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117; };
+		018 /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 118; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 		115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		116 /* Pomo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pomo.entitlements; sourceTree = "<group>"; };
 		117 /* UpdaterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterManager.swift; sourceTree = "<group>"; };
+		118 /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +124,7 @@
 			children = (
 				105 /* SoundManager.swift */,
 				117 /* UpdaterManager.swift */,
+				118 /* URLSchemeHandler.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -217,6 +220,7 @@
 				004 /* TimerManager.swift in Sources */,
 				005 /* SoundManager.swift in Sources */,
 				017 /* UpdaterManager.swift in Sources */,
+				018 /* URLSchemeHandler.swift in Sources */,
 				007 /* Color+Theme.swift in Sources */,
 				008 /* PopoverView.swift in Sources */,
 				009 /* TimerRingView.swift in Sources */,

@@ -22,17 +22,28 @@
     <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
     <key>LSUIElement</key>
     <true/>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2026. All rights reserved.</string>
-	
-	<!-- Sparkle Update Configuration -->
-	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/claudfuen/Pomo/main/appcast.xml</string>
-	<key>SUPublicEDKey</key>
-	<string>vwKNx2azCwxqaUPGyRXrdCIct1JklOZiHuoLWIeI6os=</string>
-	<key>SUEnableAutomaticChecks</key>
-	<true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026. All rights reserved.</string>
+    
+    <!-- URL Scheme for Raycast and external control -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.pomo.app</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>pomo</string>
+            </array>
+        </dict>
+    </array>
+    
+    <!-- Sparkle Update Configuration -->
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/claudfuen/Pomo/main/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>vwKNx2azCwxqaUPGyRXrdCIct1JklOZiHuoLWIeI6os=</string>
+    <key>SUEnableAutomaticChecks</key>
+    <true/>
 </dict>
 </plist>
-
-

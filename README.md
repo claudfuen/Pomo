@@ -155,6 +155,34 @@ xcodebuild -project Pomo.xcodeproj -scheme Pomo -configuration Release \
 
 ---
 
+## Raycast Integration
+
+Control Pomo directly from [Raycast](https://raycast.com)! The extension is available in the Raycast Store.
+
+**Commands:**
+- **Start 5/10/15/25/45 Minutes** — Quick-start common durations
+- **Toggle Timer** — Start/pause/resume based on current state
+- **Pause Timer** — Pause the running timer
+- **Reset Timer** — Reset timer to idle state
+
+### URL Scheme
+
+Pomo also supports URL schemes for automation:
+
+```bash
+open pomo://start/5            # Start 5 min timer
+open pomo://start/10           # Start 10 min timer
+open pomo://start/25           # Start 25 min timer
+open pomo://start/45           # Start 45 min timer
+open pomo://toggle             # Toggle timer
+open pomo://pause              # Pause timer
+open pomo://reset              # Reset timer
+```
+
+You can use any number of minutes: `pomo://start/12` works too!
+
+---
+
 ## Project Structure
 
 ```
@@ -172,7 +200,8 @@ Pomo/
 │   ├── TimerState.swift       # State enum (idle/running/paused/completed)
 │   └── TimerPreset.swift      # Preset definitions
 ├── Managers/
-│   └── SoundManager.swift     # Completion sounds
+│   ├── SoundManager.swift     # Completion sounds
+│   └── URLSchemeHandler.swift # External control (Raycast, etc.)
 └── Extensions/
     └── Color+Theme.swift      # Color palette
 ```
@@ -196,6 +225,7 @@ Contributions are welcome! Here's how:
 - [ ] iCloud sync for session data
 - [ ] Customizable sounds
 - [ ] Auto-start break after focus session
+- [x] Raycast integration
 
 ---
 

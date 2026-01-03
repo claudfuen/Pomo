@@ -77,3 +77,8 @@ __pycache__/
 # Sparkle tools (downloaded by generate_sparkle_keys.sh)
 scripts/bin/
 
+# Raycast extension
+extensions/raycast/node_modules/
+extensions/raycast/.ray/
+extensions/raycast/raycast-env.d.ts
+
