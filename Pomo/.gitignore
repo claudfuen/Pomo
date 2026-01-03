@@ -62,15 +62,3 @@ iOSInjectionProject/
 *.xcconfig
 !*.example.xcconfig
 
-# Build artifacts
-build/
-Pomo.app
-*.dmg
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.Python
-*.so
-
