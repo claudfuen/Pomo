@@ -7,22 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		001 /* PomoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101; };
-		002 /* TimerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102; };
-		003 /* TimerPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103; };
-		004 /* TimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104; };
-		005 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105; };
-		007 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107; };
-		008 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108; };
-		009 /* TimerRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109; };
-		011 /* PresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111; };
-		012 /* CustomTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112; };
-		013 /* SessionCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113; };
-		014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 114; };
-		015 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 200; };
-		016 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 201; };
-		017 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117; };
-		018 /* URLSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 118; };
+		001 /* PomoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101 /* PomoApp.swift */; };
+		002 /* TimerState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 102 /* TimerState.swift */; };
+		003 /* TimerPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 103 /* TimerPreset.swift */; };
+		004 /* TimerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104 /* TimerManager.swift */; };
+		005 /* SoundManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105 /* SoundManager.swift */; };
+		007 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107 /* Color+Theme.swift */; };
+		008 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108 /* PopoverView.swift */; };
+		009 /* TimerRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109 /* TimerRingView.swift */; };
+		011 /* PresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111 /* PresetsView.swift */; };
+		012 /* CustomTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112 /* CustomTimeView.swift */; };
+		013 /* SessionCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113 /* SessionCounterView.swift */; };
+		014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 114 /* Assets.xcassets */; };
+		015 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 200 /* HotKey */; };
+		016 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 201 /* Sparkle */; };
+		017 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117 /* UpdaterManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,7 +41,6 @@
 		115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		116 /* Pomo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pomo.entitlements; sourceTree = "<group>"; };
 		117 /* UpdaterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterManager.swift; sourceTree = "<group>"; };
-		118 /* URLSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,7 +122,6 @@
 			children = (
 				105 /* SoundManager.swift */,
 				117 /* UpdaterManager.swift */,
-				118 /* URLSchemeHandler.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -142,7 +139,7 @@
 /* Begin PBXNativeTarget section */
 		500 /* Pomo */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 600;
+			buildConfigurationList = 600 /* Build configuration list for PBXNativeTarget "Pomo" */;
 			buildPhases = (
 				501 /* Sources */,
 				300 /* Frameworks */,
@@ -176,7 +173,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 701;
+			buildConfigurationList = 701 /* Build configuration list for PBXProject "Pomo" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -220,7 +217,6 @@
 				004 /* TimerManager.swift in Sources */,
 				005 /* SoundManager.swift in Sources */,
 				017 /* UpdaterManager.swift in Sources */,
-				018 /* URLSchemeHandler.swift in Sources */,
 				007 /* Color+Theme.swift in Sources */,
 				008 /* PopoverView.swift in Sources */,
 				009 /* TimerRingView.swift in Sources */,
@@ -246,13 +242,14 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Pomo/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Pomo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pomo.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -274,13 +271,14 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Pomo/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Pomo;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.6;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.pomo.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";

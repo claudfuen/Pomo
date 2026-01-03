@@ -1,31 +1,29 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
 
-const POMO_BUNDLE_ID = "com.pomo.app";
-const POMO_DOWNLOAD_URL = "https://github.com/claudfuen/Pomo/releases/latest";
+export async function checkPomoInstallation(showErrorToast = true): Promise<boolean> {
+  const applications = await getApplications();
+  const pomoApp = applications.find((app) => app.bundleId === "com.pomo.app");
 
-async function isPomoInstalled(): Promise<boolean> {
-  const installedApps = await getApplications();
-  return installedApps.some((app) => app.bundleId === POMO_BUNDLE_ID);
-}
+  if (pomoApp) {
+    return true;
+  }
+  
+  // NOTE: For debugging locally with Xcode, return true if needed
+  // return true; 
 
-export async function checkPomoInstallation(): Promise<boolean> {
-  const isInstalled = await isPomoInstalled();
-
-  if (!isInstalled) {
-    const options: Toast.Options = {
+  if (showErrorToast) {
+    await showToast({
       style: Toast.Style.Failure,
-      title: "Pomo is not installed",
-      message: "Download it from GitHub",
+      title: "Pomo App Not Found",
+      message: "Download the app to continue.",
       primaryAction: {
         title: "Download Pomo",
-        onAction: (toast) => {
-          open(POMO_DOWNLOAD_URL);
-          toast.hide();
+        onAction: () => {
+          open("https://github.com/claudfuen/Pomo/releases/latest");
         },
       },
-    };
-    await showToast(options);
+    });
   }
-
-  return isInstalled;
+  
+  return false;
 }
