@@ -36,13 +36,19 @@ struct PomoApp: App {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     
+    private func debugLog(_ message: String) {
+        #if DEBUG
+        print(message)
+        #endif
+    }
+    
     override init() {
         super.init()
-        print("[Pomo] AppDelegate init")
+        debugLog("[Pomo] AppDelegate init")
     }
     
     func applicationWillFinishLaunching(_ notification: Notification) {
-        print("[Pomo] applicationWillFinishLaunching")
+        debugLog("[Pomo] applicationWillFinishLaunching")
         
         // Register for Apple Events
         NSAppleEventManager.shared().setEventHandler(
@@ -54,33 +60,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("[Pomo] applicationDidFinishLaunching")
+        debugLog("[Pomo] applicationDidFinishLaunching")
     }
     
     // Support standard open urls
     func application(_ application: NSApplication, open urls: [URL]) {
-        print("[Pomo] application open urls: \(urls)")
+        debugLog("[Pomo] application open urls: \(urls)")
         if let url = urls.first {
             handleURL(url)
         }
     }
     
     @objc func handleURLEvent(_ event: NSAppleEventDescriptor, withReplyEvent replyEvent: NSAppleEventDescriptor) {
-        print("[Pomo] handleURLEvent called")
+        debugLog("[Pomo] handleURLEvent called")
         guard let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
               let url = URL(string: urlString) else {
-            print("[Pomo] Failed to parse URL from Apple Event")
+            debugLog("[Pomo] Failed to parse URL from Apple Event")
             return
         }
         handleURL(url)
     }
     
     private func handleURL(_ url: URL) {
-        print("[Pomo] Processing URL: \(url.absoluteString)")
+        debugLog("[Pomo] Processing URL: \(url.absoluteString)")
         
         // Use the global state which is guaranteed to be set by App init
         guard let timerManager = AppState.timerManager else {
-            print("[Pomo] Error: AppState.timerManager is nil")
+            debugLog("[Pomo] Error: AppState.timerManager is nil")
             return
         }
         
@@ -90,7 +96,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let parameter = url.pathComponents.count > 1 ? url.pathComponents[1] : nil
         
         Task { @MainActor in
-            print("[Pomo] Executing command: \(command) with param: \(parameter ?? "none")")
+            debugLog("[Pomo] Executing command: \(command) with param: \(parameter ?? "none")")
             
             switch command {
             case "start":

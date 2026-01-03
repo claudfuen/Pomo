@@ -200,8 +200,7 @@ Pomo/
 │   ├── TimerState.swift       # State enum (idle/running/paused/completed)
 │   └── TimerPreset.swift      # Preset definitions
 ├── Managers/
-│   ├── SoundManager.swift     # Completion sounds
-│   └── URLSchemeHandler.swift # External control (Raycast, etc.)
+│   └── SoundManager.swift     # Completion sounds
 └── Extensions/
     └── Color+Theme.swift      # Color palette
 ```
