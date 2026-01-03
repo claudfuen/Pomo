@@ -24,7 +24,7 @@ struct PopoverView: View {
             
             // Custom Time Input
             if showCustomTime {
-                CustomTimeView()
+                CustomTimeView(isVisible: $showCustomTime)
                     .padding(.bottom, 16)
             }
             

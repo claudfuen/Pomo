@@ -81,6 +81,7 @@ struct QuickStartButton: View {
     let onSave: (Int) -> Void
     
     @FocusState private var isFocused: Bool
+    @State private var isHovering = false
     
     var body: some View {
         if isEditing {
@@ -93,6 +94,13 @@ struct QuickStartButton: View {
                     .focused($isFocused)
                     .onSubmit {
                         saveEdit()
+                    }
+                    .onChange(of: editText) { _, newValue in
+                        // Filter to only digits
+                        let filtered = newValue.filter { $0.isNumber }
+                        if filtered != newValue {
+                            editText = filtered
+                        }
                     }
                 
                 Text("m")
@@ -111,35 +119,41 @@ struct QuickStartButton: View {
                 isEditing = false
             }
         } else {
-            Button(action: action) {
-                HStack(spacing: 4) {
+            HStack(spacing: 4) {
+                // Main tap area for starting timer
+                Button(action: action) {
                     Text("\(minutes)m")
                         .font(.system(size: 18, weight: .semibold, design: .monospaced))
                         .foregroundStyle(.primary)
-                    
-                    Spacer()
-                    
-                    if isActive {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(.teal)
-                    } else {
-                        Button {
-                            isEditing = true
-                        } label: {
-                            Image(systemName: "pencil")
-                                .font(.system(size: 11))
-                                .foregroundStyle(.tertiary)
-                        }
-                        .buttonStyle(.plain)
+                }
+                .buttonStyle(.plain)
+                
+                Spacer()
+                
+                if isActive {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.teal)
+                } else {
+                    // Edit button - separate from main button
+                    Button {
+                        isEditing = true
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 11))
+                            .foregroundStyle(isHovering ? .secondary : .tertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .onHover { hovering in
+                        isHovering = hovering
                     }
                 }
-                .padding(.horizontal, 12)
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(.secondary.opacity(isActive ? 0.15 : 0.1), in: RoundedRectangle(cornerRadius: 10))
             }
-            .buttonStyle(.plain)
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .background(.secondary.opacity(isActive ? 0.15 : 0.1), in: RoundedRectangle(cornerRadius: 10))
+            .contentShape(Rectangle())
         }
     }
     
