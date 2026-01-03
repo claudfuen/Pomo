@@ -133,11 +133,6 @@ class TimerManager: ObservableObject {
         }
     }
     
-    func setPreset(_ preset: TimerPreset) {
-        reset()
-        start(minutes: preset.minutes)
-    }
-    
     func setCustomTime(minutes: Int) {
         reset()
         start(minutes: minutes)

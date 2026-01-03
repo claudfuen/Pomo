@@ -2,77 +2,36 @@ import SwiftUI
 
 struct CustomTimeView: View {
     @EnvironmentObject var timerManager: TimerManager
+    // Keep as Double for backwards compatibility with existing user preferences
     @AppStorage("customMinutes") private var customMinutes: Double = 25
+    @State private var inputText: String = ""
+    @FocusState private var isFocused: Bool
     
     var body: some View {
-        VStack(spacing: 12) {
-            // Time display
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(Int(customMinutes))")
+        VStack(spacing: 16) {
+            // Time input
+            HStack(alignment: .center, spacing: 8) {
+                TextField("", text: $inputText)
+                    .textFieldStyle(.plain)
                     .font(.system(size: 32, weight: .semibold, design: .rounded))
                     .foregroundStyle(Color.theme.primary)
-                    .contentTransition(.numericText())
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: Int(customMinutes))
+                    .frame(width: 70)
+                    .multilineTextAlignment(.center)
+                    .focused($isFocused)
+                    .onSubmit {
+                        startTimer()
+                    }
                 
                 Text("min")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(Color.theme.secondaryText)
             }
-            .accessibilityLabel("\(Int(customMinutes)) minutes")
-            
-            // Slider
-            HStack(spacing: 12) {
-                Text("1")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                
-                Slider(value: $customMinutes, in: 1...120, step: 1)
-                    .tint(Color.theme.primary)
-                    .accessibilityLabel("Duration slider")
-                    .accessibilityValue("\(Int(customMinutes)) minutes")
-                
-                Text("120")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-            }
-            .padding(.horizontal, 4)
-            
-            // Quick adjust buttons
-            HStack(spacing: 8) {
-                QuickAdjustButton(label: "-5") {
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                        customMinutes = max(1, customMinutes - 5)
-                    }
-                }
-                
-                QuickAdjustButton(label: "-1") {
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                        customMinutes = max(1, customMinutes - 1)
-                    }
-                }
-                
-                Spacer()
-                
-                QuickAdjustButton(label: "+1") {
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                        customMinutes = min(120, customMinutes + 1)
-                    }
-                }
-                
-                QuickAdjustButton(label: "+5") {
-                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                        customMinutes = min(120, customMinutes + 5)
-                    }
-                }
-            }
+            .padding(.vertical, 8)
+            .accessibilityLabel("\(displayMinutes) minutes")
             
             // Start button
-            Button(action: {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    timerManager.setCustomTime(minutes: Int(customMinutes))
-                }
-            }) {
-                Text("Start \(Int(customMinutes)) min")
+            Button(action: startTimer) {
+                Text("Start \(displayMinutes) min")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -81,46 +40,30 @@ struct CustomTimeView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
             .buttonStyle(.plain)
-            .accessibilityHint("Starts a timer for \(Int(customMinutes)) minutes")
+            .accessibilityHint("Starts a timer for \(displayMinutes) minutes")
         }
         .padding(.horizontal, 20)
+        .onAppear {
+            inputText = "\(Int(customMinutes))"
+            isFocused = true
+        }
         .transition(.asymmetric(
             insertion: .move(edge: .top).combined(with: .opacity),
             removal: .move(edge: .top).combined(with: .opacity)
         ))
     }
-}
-
-struct QuickAdjustButton: View {
-    let label: String
-    let action: () -> Void
     
-    @State private var isHovered = false
-    @State private var isPressed = false
+    private var displayMinutes: Int {
+        Int(inputText) ?? Int(customMinutes)
+    }
     
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundStyle(isHovered ? Color.theme.primary : Color.theme.secondaryText)
-                .frame(width: 36, height: 28)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(isHovered ? Color.theme.primary.opacity(0.15) : Color.theme.secondaryBackground.opacity(0.5))
-                )
-                .scaleEffect(isPressed ? 0.95 : 1.0)
-        }
-        .buttonStyle(.plain)
-        .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) {
-                isHovered = hovering
+    private func startTimer() {
+        if let value = Int(inputText), value >= 1, value <= 120 {
+            customMinutes = Double(value)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                timerManager.setCustomTime(minutes: value)
             }
         }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in isPressed = true }
-                .onEnded { _ in isPressed = false }
-        )
     }
 }
 

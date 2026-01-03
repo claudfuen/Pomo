@@ -4,7 +4,13 @@ struct PresetsView: View {
     @EnvironmentObject var timerManager: TimerManager
     @Binding var showCustomTime: Bool
     
-    private let presets = TimerPreset.defaults
+    @AppStorage("quickStart1") private var quickStart1: Int = 25
+    @AppStorage("quickStart2") private var quickStart2: Int = 5
+    
+    @State private var editingQuickStart1 = false
+    @State private var editingQuickStart2 = false
+    @State private var editText1 = ""
+    @State private var editText2 = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -14,85 +20,134 @@ struct PresetsView: View {
                 .textCase(.uppercase)
                 .padding(.horizontal, 20)
             
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 8) {
-                ForEach(presets) { preset in
-                    PresetButton(
-                        preset: preset,
-                        isActive: isPresetActive(preset)
-                    ) {
-                        timerManager.setPreset(preset)
-                        showCustomTime = false
-                    }
+            HStack(spacing: 8) {
+                QuickStartButton(
+                    minutes: quickStart1,
+                    isEditing: $editingQuickStart1,
+                    editText: $editText1,
+                    isActive: isActive(quickStart1)
+                ) {
+                    timerManager.setCustomTime(minutes: quickStart1)
+                    showCustomTime = false
+                } onSave: { newValue in
+                    quickStart1 = newValue
                 }
                 
-                // Custom button
-                Button {
-                    showCustomTime.toggle()
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: showCustomTime ? "xmark" : "slider.horizontal.3")
-                            .font(.system(size: 12))
-                        Text("Custom")
-                            .font(.system(size: 13, weight: .medium))
-                    }
-                    .foregroundStyle(showCustomTime ? .teal : .secondary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 36)
-                    .background(.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                QuickStartButton(
+                    minutes: quickStart2,
+                    isEditing: $editingQuickStart2,
+                    editText: $editText2,
+                    isActive: isActive(quickStart2)
+                ) {
+                    timerManager.setCustomTime(minutes: quickStart2)
+                    showCustomTime = false
+                } onSave: { newValue in
+                    quickStart2 = newValue
                 }
-                .buttonStyle(.plain)
             }
+            .padding(.horizontal, 16)
+            
+            // Custom button
+            Button {
+                showCustomTime.toggle()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: showCustomTime ? "xmark" : "timer")
+                        .font(.system(size: 12))
+                    Text("Custom")
+                        .font(.system(size: 13, weight: .medium))
+                }
+                .foregroundStyle(showCustomTime ? .teal : .secondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 36)
+                .background(.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+            }
+            .buttonStyle(.plain)
             .padding(.horizontal, 16)
         }
     }
     
-    private func isPresetActive(_ preset: TimerPreset) -> Bool {
-        timerManager.state != .idle && timerManager.totalSeconds == preset.seconds
+    private func isActive(_ minutes: Int) -> Bool {
+        timerManager.state != .idle && timerManager.totalSeconds == minutes * 60
     }
 }
 
-struct PresetButton: View {
-    let preset: TimerPreset
+struct QuickStartButton: View {
+    let minutes: Int
+    @Binding var isEditing: Bool
+    @Binding var editText: String
     let isActive: Bool
     let action: () -> Void
+    let onSave: (Int) -> Void
     
-    private var accentColor: Color {
-        preset.category == .focus ? .teal : .purple
-    }
+    @FocusState private var isFocused: Bool
     
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(accentColor)
-                    .frame(width: 6, height: 6)
+        if isEditing {
+            HStack(spacing: 4) {
+                TextField("", text: $editText)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 18, weight: .semibold, design: .monospaced))
+                    .frame(width: 40)
+                    .multilineTextAlignment(.center)
+                    .focused($isFocused)
+                    .onSubmit {
+                        saveEdit()
+                    }
                 
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("\(preset.minutes)m")
-                        .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.primary)
-                    
-                    Text(preset.name)
-                        .font(.system(size: 10))
-                        .foregroundStyle(.tertiary)
-                }
-                
-                Spacer()
-                
-                if isActive {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(accentColor)
-                }
+                Text("m")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity)
             .frame(height: 44)
-            .background(.secondary.opacity(isActive ? 0.15 : 0.1), in: RoundedRectangle(cornerRadius: 10))
+            .background(.teal.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+            .onAppear {
+                editText = "\(minutes)"
+                isFocused = true
+            }
+            .onExitCommand {
+                isEditing = false
+            }
+        } else {
+            Button(action: action) {
+                HStack(spacing: 4) {
+                    Text("\(minutes)m")
+                        .font(.system(size: 18, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(.primary)
+                    
+                    Spacer()
+                    
+                    if isActive {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.teal)
+                    } else {
+                        Button {
+                            isEditing = true
+                        } label: {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 11))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity)
+                .frame(height: 44)
+                .background(.secondary.opacity(isActive ? 0.15 : 0.1), in: RoundedRectangle(cornerRadius: 10))
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+    }
+    
+    private func saveEdit() {
+        if let value = Int(editText), value >= 1, value <= 120 {
+            onSave(value)
+        }
+        isEditing = false
     }
 }
 
