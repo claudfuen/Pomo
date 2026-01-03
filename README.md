@@ -197,6 +197,19 @@ Contributions are welcome! Here's how:
 
 ---
 
+## Releasing
+
+To release a new version:
+
+```bash
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+That's it! GitHub Actions will automatically build the app, create a DMG, update the appcast, and publish to [Releases](https://github.com/claudfuen/Pomo/releases).
+
+---
+
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
