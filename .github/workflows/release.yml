@@ -15,6 +15,9 @@ env:
   SCHEME: Pomo
   PROJECT: Pomo.xcodeproj
 
+permissions:
+  contents: write
+
 jobs:
   build-sign-release:
     runs-on: macos-14
