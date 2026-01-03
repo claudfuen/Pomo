@@ -103,35 +103,28 @@ jobs:
           SIGNATURE="${{ steps.sign.outputs.signature }}"
           LENGTH="${{ steps.sign.outputs.length }}"
           
-          # Create new item entry
-          NEW_ITEM=$(cat <<EOF
-    <item>
-      <title>Version ${VERSION}</title>
-      <description>
-        <![CDATA[
-          <h2>What's New in ${VERSION}</h2>
-          <p>See the <a href="https://github.com/claudfuen/Pomo/releases/tag/v${VERSION}">release notes</a> for details.</p>
-        ]]>
-      </description>
-      <pubDate>${DATE}</pubDate>
-      <sparkle:version>${BUILD}</sparkle:version>
-      <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <enclosure 
-        url="https://github.com/claudfuen/Pomo/releases/download/v${VERSION}/Pomo.dmg"
-        sparkle:edSignature="${SIGNATURE}"
-        length="${LENGTH}"
-        type="application/octet-stream"/>
-    </item>
-EOF
-)
+          # Create new item entry using printf to avoid heredoc YAML issues
+          NEW_ITEM="    <item>
+              <title>Version ${VERSION}</title>
+              <description>
+                <![CDATA[
+                  <h2>What's New in ${VERSION}</h2>
+                  <p>See the <a href=\"https://github.com/claudfuen/Pomo/releases/tag/v${VERSION}\">release notes</a> for details.</p>
+                ]]>
+              </description>
+              <pubDate>${DATE}</pubDate>
+              <sparkle:version>${BUILD}</sparkle:version>
+              <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+              <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+              <enclosure 
+                url=\"https://github.com/claudfuen/Pomo/releases/download/v${VERSION}/Pomo.dmg\"
+                sparkle:edSignature=\"${SIGNATURE}\"
+                length=\"${LENGTH}\"
+                type=\"application/octet-stream\"/>
+            </item>"
           
           # Insert new item after the comment block (before existing items)
-          # Using awk to insert after lines ending with -->
-          awk -v new_item="$NEW_ITEM" '
-            /-->$/ { print; print ""; print new_item; next }
-            { print }
-          ' appcast.xml > appcast_new.xml
+          awk -v new_item="$NEW_ITEM" '/-->$/ { print; print ""; print new_item; next } { print }' appcast.xml > appcast_new.xml
           
           mv appcast_new.xml appcast.xml
       
