@@ -13,7 +13,6 @@ import AppKit
 /// - pomo://pause
 /// - pomo://resume
 /// - pomo://reset
-@MainActor
 class URLSchemeHandler: ObservableObject {
     private weak var timerManager: TimerManager?
     
@@ -37,12 +36,13 @@ class URLSchemeHandler: ObservableObject {
             return
         }
         
-        Task { @MainActor in
-            handleURL(url)
+        // Dispatch to main thread for UI updates
+        DispatchQueue.main.async { [weak self] in
+            self?.handleURL(url)
         }
     }
     
-    func handleURL(_ url: URL) {
+    private func handleURL(_ url: URL) {
         guard url.scheme == "pomo" else { return }
         
         let command = url.host ?? ""

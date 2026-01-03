@@ -2,16 +2,15 @@ import SwiftUI
 
 @main
 struct PomoApp: App {
-    @StateObject private var timerManager = TimerManager()
-    @StateObject private var updaterManager = UpdaterManager()
-    
-    // URL scheme handler - initialized immediately at app launch
-    // Using @StateObject ensures proper lifecycle management for this reference type
+    @StateObject private var timerManager: TimerManager
+    @StateObject private var updaterManager: UpdaterManager
     @StateObject private var urlSchemeHandler: URLSchemeHandler
     
     init() {
-        // Create timerManager first, then pass it to urlSchemeHandler
+        // Create shared TimerManager instance
         let timer = TimerManager()
+        
+        // Initialize all StateObjects with the shared timer
         _timerManager = StateObject(wrappedValue: timer)
         _updaterManager = StateObject(wrappedValue: UpdaterManager())
         _urlSchemeHandler = StateObject(wrappedValue: URLSchemeHandler(timerManager: timer))
