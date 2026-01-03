@@ -3,8 +3,8 @@ import SwiftUI
 struct TimerRingView: View {
     @EnvironmentObject var timerManager: TimerManager
     
-    private let ringSize: CGFloat = 160
-    private let lineWidth: CGFloat = 8
+    private let ringSize: CGFloat = 140
+    private let lineWidth: CGFloat = 6
     
     var body: some View {
         ZStack {
@@ -25,40 +25,36 @@ struct TimerRingView: View {
                 .animation(.linear(duration: 0.5), value: timerManager.remainingProgress)
             
             // Center content
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Text(timerManager.displayTime)
-                    .font(.system(size: 36, weight: .medium, design: .monospaced))
+                    .font(.system(size: 32, weight: .medium, design: .monospaced))
                     .monospacedDigit()
                     .foregroundStyle(.primary)
                 
-                stateIndicator
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                timerManager.toggle()
+                stateLabel
             }
         }
         .frame(width: ringSize + 20, height: ringSize + 20)
     }
     
     @ViewBuilder
-    private var stateIndicator: some View {
+    private var stateLabel: some View {
         switch timerManager.state {
         case .idle:
-            Text("Tap to start")
-                .font(.caption)
+            Text("Ready")
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.secondary)
         case .running:
             Text("Running")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Color.teal)
         case .paused:
             Text("Paused")
-                .font(.caption)
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.orange)
         case .completed:
-            Text("Done!")
-                .font(.caption)
+            Text("Complete")
+                .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(.green)
         }
     }

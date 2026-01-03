@@ -15,8 +15,6 @@
 		007 /* Color+Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 107 /* Color+Theme.swift */; };
 		008 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108 /* PopoverView.swift */; };
 		009 /* TimerRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109 /* TimerRingView.swift */; };
-		011 /* PresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111 /* PresetsView.swift */; };
-		012 /* CustomTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112 /* CustomTimeView.swift */; };
 		014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 114 /* Assets.xcassets */; };
 		015 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 200 /* HotKey */; };
 		016 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 201 /* Sparkle */; };
@@ -33,8 +31,6 @@
 		107 /* Color+Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Theme.swift"; sourceTree = "<group>"; };
 		108 /* PopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverView.swift; sourceTree = "<group>"; };
 		109 /* TimerRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerRingView.swift; sourceTree = "<group>"; };
-		111 /* PresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsView.swift; sourceTree = "<group>"; };
-		112 /* CustomTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTimeView.swift; sourceTree = "<group>"; };
 		114 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		116 /* Pomo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pomo.entitlements; sourceTree = "<group>"; };
@@ -108,8 +104,6 @@
 			children = (
 				108 /* PopoverView.swift */,
 				109 /* TimerRingView.swift */,
-				111 /* PresetsView.swift */,
-				112 /* CustomTimeView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -217,8 +211,6 @@
 				007 /* Color+Theme.swift in Sources */,
 				008 /* PopoverView.swift in Sources */,
 				009 /* TimerRingView.swift in Sources */,
-				011 /* PresetsView.swift in Sources */,
-				012 /* CustomTimeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
