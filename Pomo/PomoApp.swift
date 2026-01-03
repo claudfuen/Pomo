@@ -5,20 +5,23 @@ struct PomoApp: App {
     @StateObject private var timerManager = TimerManager()
     @StateObject private var updaterManager = UpdaterManager()
     
-    // URL scheme handler for external control (Raycast, etc.)
-    @State private var urlSchemeHandler: URLSchemeHandler?
+    // URL scheme handler - initialized immediately at app launch
+    // Using @StateObject ensures proper lifecycle management for this reference type
+    @StateObject private var urlSchemeHandler: URLSchemeHandler
+    
+    init() {
+        // Create timerManager first, then pass it to urlSchemeHandler
+        let timer = TimerManager()
+        _timerManager = StateObject(wrappedValue: timer)
+        _updaterManager = StateObject(wrappedValue: UpdaterManager())
+        _urlSchemeHandler = StateObject(wrappedValue: URLSchemeHandler(timerManager: timer))
+    }
     
     var body: some Scene {
         MenuBarExtra {
             PopoverView()
                 .environmentObject(timerManager)
                 .environmentObject(updaterManager)
-                .onAppear {
-                    // Initialize URL handler when app appears
-                    if urlSchemeHandler == nil {
-                        urlSchemeHandler = URLSchemeHandler(timerManager: timerManager)
-                    }
-                }
         } label: {
             MenuBarLabel()
                 .environmentObject(timerManager)

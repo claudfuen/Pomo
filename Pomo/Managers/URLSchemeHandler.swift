@@ -14,7 +14,7 @@ import AppKit
 /// - pomo://resume
 /// - pomo://reset
 @MainActor
-class URLSchemeHandler {
+class URLSchemeHandler: ObservableObject {
     private weak var timerManager: TimerManager?
     
     init(timerManager: TimerManager) {
