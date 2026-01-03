@@ -7,28 +7,28 @@ struct PopoverView: View {
         VStack(spacing: 0) {
             // Timer Display
             TimerRingView()
-                .padding(.top, 24)
-                .padding(.bottom, 16)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
             
             // Control Buttons
             ControlButtonsView()
-                .padding(.bottom, 20)
+                .padding(.bottom, 16)
             
             Divider()
                 .padding(.horizontal, 16)
             
             // Duration Picker
             DurationPickerView()
-                .padding(.vertical, 16)
+                .padding(.vertical, 14)
             
             Divider()
                 .padding(.horizontal, 16)
             
             // Footer
             FooterView()
-                .padding(.vertical, 12)
+                .padding(.vertical, 10)
         }
-        .frame(width: 280)
+        .frame(width: 260)
         .background(.ultraThinMaterial)
         .onKeyPress(.space) {
             timerManager.toggle()
@@ -44,38 +44,54 @@ struct ControlButtonsView: View {
     @EnvironmentObject var timerManager: TimerManager
     
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 20) {
             // Reset Button
             Button {
                 timerManager.reset()
             } label: {
-                Image(systemName: "stop.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(timerManager.state == .idle ? .tertiary : .secondary)
-                    .frame(width: 44, height: 44)
-                    .background(.secondary.opacity(0.1), in: Circle())
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(canReset ? .primary : .quaternary)
+                    .frame(width: 40, height: 40)
+                    .background(.secondary.opacity(0.08), in: Circle())
             }
             .buttonStyle(.plain)
-            .disabled(timerManager.state == .idle)
-            .help("Reset timer")
+            .disabled(!canReset)
+            .keyboardShortcut("r", modifiers: .command)
             
             // Play/Pause Button
             Button {
                 timerManager.toggle()
             } label: {
                 Image(systemName: playPauseIcon)
-                    .font(.system(size: 20, weight: .semibold))
+                    .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
-                    .frame(width: 56, height: 56)
-                    .background(Color.teal, in: Circle())
+                    .frame(width: 52, height: 52)
+                    .background(buttonColor, in: Circle())
             }
             .buttonStyle(.plain)
-            .help(playPauseHelp)
             
-            // Spacer to balance the layout (same size as reset button)
-            Color.clear
-                .frame(width: 44, height: 44)
+            // +1 Minute Button (only when running or paused)
+            Button {
+                timerManager.addMinute()
+            } label: {
+                Text("+1m")
+                    .font(.system(size: 12, weight: .semibold, design: .rounded))
+                    .foregroundStyle(canAddTime ? .primary : .quaternary)
+                    .frame(width: 40, height: 40)
+                    .background(.secondary.opacity(0.08), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(!canAddTime)
         }
+    }
+    
+    private var canReset: Bool {
+        timerManager.state != .idle
+    }
+    
+    private var canAddTime: Bool {
+        timerManager.state == .running || timerManager.state == .paused
     }
     
     private var playPauseIcon: String {
@@ -87,16 +103,14 @@ struct ControlButtonsView: View {
         }
     }
     
-    private var playPauseHelp: String {
+    private var buttonColor: Color {
         switch timerManager.state {
-        case .idle:
-            return "Start timer"
-        case .running:
-            return "Pause timer"
-        case .paused:
-            return "Resume timer"
         case .completed:
-            return "Start new timer"
+            return .green
+        case .running:
+            return .orange
+        default:
+            return .teal
         }
     }
 }
@@ -107,25 +121,34 @@ struct DurationPickerView: View {
     @EnvironmentObject var timerManager: TimerManager
     @AppStorage("selectedDuration") private var selectedDuration: Int = 25
     
-    private let durations = [5, 10, 15, 20, 25, 30, 45, 60, 90]
+    private let durations = [5, 10, 15, 20, 25, 30, 45, 60]
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Duration")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .textCase(.uppercase)
-                .padding(.horizontal, 20)
+            HStack {
+                Text("Duration")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                
+                Spacer()
+                
+                if timerManager.state != .idle {
+                    Text("Reset to change")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding(.horizontal, 20)
             
             Menu {
                 ForEach(durations, id: \.self) { minutes in
                     Button {
-                        selectedDuration = minutes
-                        timerManager.setCustomTime(minutes: minutes)
+                        selectDuration(minutes)
                     } label: {
                         HStack {
                             Text(formatDuration(minutes))
-                            if isCurrentDuration(minutes) {
+                            if selectedDuration == minutes {
                                 Spacer()
                                 Image(systemName: "checkmark")
                             }
@@ -135,12 +158,10 @@ struct DurationPickerView: View {
                 
                 Divider()
                 
-                // Custom option
-                Menu("Custom...") {
-                    ForEach([1, 2, 3, 35, 40, 50, 75, 120], id: \.self) { minutes in
+                Menu("More...") {
+                    ForEach([1, 2, 3, 90, 120], id: \.self) { minutes in
                         Button {
-                            selectedDuration = minutes
-                            timerManager.setCustomTime(minutes: minutes)
+                            selectDuration(minutes)
                         } label: {
                             Text(formatDuration(minutes))
                         }
@@ -148,31 +169,29 @@ struct DurationPickerView: View {
                 }
             } label: {
                 HStack {
-                    Text(formatDuration(currentMinutes))
-                        .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.primary)
+                    Text(formatDuration(selectedDuration))
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(timerManager.state == .idle ? .primary : .secondary)
                     
                     Spacer()
                     
                     Image(systemName: "chevron.up.chevron.down")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.tertiary)
                 }
-                .padding(.horizontal, 14)
-                .frame(height: 40)
-                .background(.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                .padding(.horizontal, 12)
+                .frame(height: 36)
+                .background(.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
             }
             .menuStyle(.borderlessButton)
+            .disabled(timerManager.state != .idle)
             .padding(.horizontal, 16)
         }
     }
     
-    private var currentMinutes: Int {
-        timerManager.totalSeconds / 60
-    }
-    
-    private func isCurrentDuration(_ minutes: Int) -> Bool {
-        currentMinutes == minutes
+    private func selectDuration(_ minutes: Int) {
+        selectedDuration = minutes
+        timerManager.setDuration(minutes: minutes)
     }
     
     private func formatDuration(_ minutes: Int) -> String {
@@ -195,9 +214,12 @@ struct FooterView: View {
     
     var body: some View {
         HStack {
-            Text("⌘⇧P to toggle")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            Text("⌘⇧P")
+                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .foregroundStyle(.tertiary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 4))
             
             Spacer()
             
@@ -205,36 +227,21 @@ struct FooterView: View {
                 updaterManager.checkForUpdates()
             }
             .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .font(.system(size: 11))
+            .foregroundStyle(.tertiary)
             .disabled(!updaterManager.canCheckForUpdates)
-            .onHover { isHovered in
-                if isHovered && updaterManager.canCheckForUpdates {
-                    NSCursor.pointingHand.push()
-                } else {
-                    NSCursor.pop()
-                }
-            }
             
-            Text("•")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
+            Text("·")
+                .foregroundStyle(.quaternary)
             
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
             }
             .buttonStyle(.plain)
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .onHover { isHovered in
-                if isHovered {
-                    NSCursor.pointingHand.push()
-                } else {
-                    NSCursor.pop()
-                }
-            }
+            .font(.system(size: 11))
+            .foregroundStyle(.tertiary)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 16)
     }
 }
 

@@ -7,11 +7,11 @@ import HotKey
 class TimerManager: ObservableObject {
     // MARK: - Published Properties
     @Published var state: TimerState = .idle
-    @Published var totalSeconds: Int = 1500
-    @Published var remainingSeconds: Int = 1500
+    @Published var totalSeconds: Int
+    @Published var remainingSeconds: Int
     
     // MARK: - Persisted Properties
-    @AppStorage("lastUsedMinutes") private var lastUsedMinutes: Int = 25
+    @AppStorage("selectedDuration") private var selectedDuration: Int = 25
     
     // MARK: - Private Properties
     private var timer: AnyCancellable?
@@ -70,6 +70,12 @@ class TimerManager: ObservableObject {
     
     // MARK: - Initialization
     init() {
+        // Initialize with saved duration
+        let savedMinutes = UserDefaults.standard.integer(forKey: "selectedDuration")
+        let minutes = savedMinutes > 0 ? savedMinutes : 25
+        self.totalSeconds = minutes * 60
+        self.remainingSeconds = minutes * 60
+        
         requestNotificationPermission()
         setupHotKey()
     }
@@ -88,9 +94,9 @@ class TimerManager: ObservableObject {
         if let minutes = minutes {
             totalSeconds = minutes * 60
             remainingSeconds = totalSeconds
-            lastUsedMinutes = minutes
+            selectedDuration = minutes
         } else if state == .idle {
-            totalSeconds = lastUsedMinutes * 60
+            totalSeconds = selectedDuration * 60
             remainingSeconds = totalSeconds
         }
         
@@ -132,6 +138,20 @@ class TimerManager: ObservableObject {
     func setCustomTime(minutes: Int) {
         reset()
         start(minutes: minutes)
+    }
+    
+    func setDuration(minutes: Int) {
+        // Only change duration when idle
+        guard state == .idle else { return }
+        totalSeconds = minutes * 60
+        remainingSeconds = totalSeconds
+        selectedDuration = minutes
+    }
+    
+    func addMinute() {
+        // Add 60 seconds to both total and remaining
+        totalSeconds += 60
+        remainingSeconds += 60
     }
     
     // MARK: - Private Methods
