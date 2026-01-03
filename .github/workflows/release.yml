@@ -23,12 +23,31 @@ jobs:
         with:
           xcode-version: latest-stable
       
+      - name: Install Apple certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Decode certificate
+          printf '%s' "$CERTIFICATE_P12" | base64 -D > $CERTIFICATE_PATH
+
+          # Create and configure keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+      
       - name: Extract version from tag
         id: version
         run: |
           TAG=${GITHUB_REF#refs/tags/v}
           echo "version=$TAG" >> $GITHUB_OUTPUT
-          # Calculate build number from git tags count
           BUILD_NUM=$(git tag | wc -l | tr -d ' ')
           echo "build=$BUILD_NUM" >> $GITHUB_OUTPUT
       
@@ -46,9 +65,34 @@ jobs:
             MACOSX_DEPLOYMENT_TARGET=14.0 \
             build
           
-          # Copy app to build directory
           mkdir -p build
           cp -R "build/DerivedData/Build/Products/Release/Pomo.app" build/
+      
+      - name: Sign app with Developer ID
+        run: |
+          codesign --force --deep --options runtime \
+            --sign "Developer ID Application: ${{ secrets.DEVELOPER_NAME }} (${{ secrets.TEAM_ID }})" \
+            "build/Pomo.app"
+          
+          codesign --verify --deep --strict --verbose=2 "build/Pomo.app"
+          echo "✅ App signed"
+      
+      - name: Notarize app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: |
+          ditto -c -k --keepParent "build/Pomo.app" "build/Pomo.zip"
+          
+          xcrun notarytool submit "build/Pomo.zip" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --wait
+          
+          xcrun stapler staple "build/Pomo.app"
+          echo "✅ App notarized"
       
       - name: Download Sparkle tools
         run: |
@@ -59,10 +103,8 @@ jobs:
       
       - name: Create DMG
         run: |
-          # Install create-dmg
           brew install create-dmg
           
-          # Create styled DMG
           create-dmg \
             --volname "Pomo" \
             --volicon "Pomo/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" \
@@ -75,25 +117,36 @@ jobs:
             "build/Pomo.dmg" \
             "build/Pomo.app" || true
       
+      - name: Notarize DMG
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: |
+          xcrun notarytool submit "build/Pomo.dmg" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --wait
+          
+          xcrun stapler staple "build/Pomo.dmg"
+          echo "✅ DMG notarized"
+      
       - name: Sign DMG with Sparkle
         id: sign
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          # Write private key to temp file
           echo "$SPARKLE_PRIVATE_KEY" > /tmp/sparkle_private_key
           
-          # Sign the DMG
           SIGN_OUTPUT=$(./sparkle-tools/bin/sign_update build/Pomo.dmg --ed-key-file /tmp/sparkle_private_key)
           
-          # Extract signature
           SIGNATURE=$(echo "$SIGN_OUTPUT" | grep -oE 'sparkle:edSignature="[^"]+"' | cut -d'"' -f2)
           LENGTH=$(stat -f%z build/Pomo.dmg)
           
           echo "signature=$SIGNATURE" >> $GITHUB_OUTPUT
           echo "length=$LENGTH" >> $GITHUB_OUTPUT
           
-          # Clean up
           rm /tmp/sparkle_private_key
       
       - name: Update appcast.xml
@@ -104,7 +157,6 @@ jobs:
           SIGNATURE="${{ steps.sign.outputs.signature }}"
           LENGTH="${{ steps.sign.outputs.length }}"
           
-          # Write new item to temp file
           cat > /tmp/new_item.xml << XMLEOF
             <item>
               <title>Version ${VERSION}</title>
@@ -117,7 +169,6 @@ jobs:
             </item>
           XMLEOF
           
-          # Insert after the comment line using sed
           sed -i '' '/-->/r /tmp/new_item.xml' appcast.xml
           rm /tmp/new_item.xml
       
@@ -141,3 +192,8 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
