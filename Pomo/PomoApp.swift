@@ -124,16 +124,15 @@ struct MenuBarLabel: View {
     @EnvironmentObject var timerManager: TimerManager
     
     var body: some View {
-        HStack(alignment: .center, spacing: 4) {
+        HStack(alignment: .center, spacing: 5) {
             Image(systemName: timerManager.menuBarIcon)
                 .symbolRenderingMode(.hierarchical)
                 .symbolEffect(.pulse, options: .repeating, isActive: timerManager.state == .completed)
-                .font(.system(size: 13))
+                .font(.system(size: 14))
             
             if timerManager.state == .running || timerManager.state == .paused {
                 Text(timerManager.menuBarText)
-                    .font(.system(size: 13, weight: .regular, design: .monospaced))
-                    .monospacedDigit()
+                    .font(.system(size: 14).monospacedDigit())
             }
         }
     }
