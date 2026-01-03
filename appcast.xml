@@ -8,6 +8,15 @@
     
     <!-- New releases are automatically added below by GitHub Actions -->
   <item>
+    <title>Version 1.1.4</title>
+    <description><![CDATA[<h2>What's New in 1.1.4</h2><p>See the <a href="https://github.com/claudfuen/Pomo/releases/tag/v1.1.4">release notes</a> for details.</p>]]></description>
+    <pubDate>Sat, 03 Jan 2026 02:20:24 +0000</pubDate>
+    <sparkle:version>17</sparkle:version>
+    <sparkle:shortVersionString>1.1.4</sparkle:shortVersionString>
+    <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+    <enclosure url="https://github.com/claudfuen/Pomo/releases/download/v1.1.4/Pomo.dmg" sparkle:edSignature="NRORw1sRSYelP6xZZdeFzIMtW6fV3aAlbZy6ugoW6T9w1fS6twODorHQ+/4pOyinrCujmuVtP/M+qXSNuTzpBA==" length="1078372" type="application/octet-stream"/>
+  </item>
+  <item>
     <title>Version 1.1.1</title>
     <description><![CDATA[<h2>What's New in 1.1.1</h2><p>See the <a href="https://github.com/claudfuen/Pomo/releases/tag/v1.1.1">release notes</a> for details.</p>]]></description>
     <pubDate>Sat, 03 Jan 2026 01:47:35 +0000</pubDate>
