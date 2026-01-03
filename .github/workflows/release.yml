@@ -103,30 +103,22 @@ jobs:
           SIGNATURE="${{ steps.sign.outputs.signature }}"
           LENGTH="${{ steps.sign.outputs.length }}"
           
-          # Create new item entry using printf to avoid heredoc YAML issues
-          NEW_ITEM="    <item>
+          # Write new item to temp file
+          cat > /tmp/new_item.xml << XMLEOF
+            <item>
               <title>Version ${VERSION}</title>
-              <description>
-                <![CDATA[
-                  <h2>What's New in ${VERSION}</h2>
-                  <p>See the <a href=\"https://github.com/claudfuen/Pomo/releases/tag/v${VERSION}\">release notes</a> for details.</p>
-                ]]>
-              </description>
+              <description><![CDATA[<h2>What's New in ${VERSION}</h2><p>See the <a href="https://github.com/claudfuen/Pomo/releases/tag/v${VERSION}">release notes</a> for details.</p>]]></description>
               <pubDate>${DATE}</pubDate>
               <sparkle:version>${BUILD}</sparkle:version>
               <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
               <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-              <enclosure 
-                url=\"https://github.com/claudfuen/Pomo/releases/download/v${VERSION}/Pomo.dmg\"
-                sparkle:edSignature=\"${SIGNATURE}\"
-                length=\"${LENGTH}\"
-                type=\"application/octet-stream\"/>
-            </item>"
+              <enclosure url="https://github.com/claudfuen/Pomo/releases/download/v${VERSION}/Pomo.dmg" sparkle:edSignature="${SIGNATURE}" length="${LENGTH}" type="application/octet-stream"/>
+            </item>
+          XMLEOF
           
-          # Insert new item after the comment block (before existing items)
-          awk -v new_item="$NEW_ITEM" '/-->$/ { print; print ""; print new_item; next } { print }' appcast.xml > appcast_new.xml
-          
-          mv appcast_new.xml appcast.xml
+          # Insert after the comment line using sed
+          sed -i '' '/-->/r /tmp/new_item.xml' appcast.xml
+          rm /tmp/new_item.xml
       
       - name: Commit updated appcast
         run: |
