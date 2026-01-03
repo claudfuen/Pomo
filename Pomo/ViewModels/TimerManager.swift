@@ -9,12 +9,9 @@ class TimerManager: ObservableObject {
     @Published var state: TimerState = .idle
     @Published var totalSeconds: Int = 1500
     @Published var remainingSeconds: Int = 1500
-    @Published var sessionsToday: Int = 0
     
     // MARK: - Persisted Properties
     @AppStorage("lastUsedMinutes") private var lastUsedMinutes: Int = 25
-    @AppStorage("lastSessionDate") private var lastSessionDate: String = ""
-    @AppStorage("savedSessionsToday") private var savedSessionsToday: Int = 0
     
     // MARK: - Private Properties
     private var timer: AnyCancellable?
@@ -74,7 +71,6 @@ class TimerManager: ObservableObject {
     // MARK: - Initialization
     init() {
         requestNotificationPermission()
-        loadSessionData()
         setupHotKey()
     }
     
@@ -164,31 +160,8 @@ class TimerManager: ObservableObject {
         timer = nil
         state = .completed
         
-        incrementSession()
         soundManager.playCompletionSound()
         sendCompletionNotification()
-    }
-    
-    private func incrementSession() {
-        sessionsToday += 1
-        savedSessionsToday = sessionsToday
-        lastSessionDate = todayString
-    }
-    
-    private func loadSessionData() {
-        if lastSessionDate == todayString {
-            sessionsToday = savedSessionsToday
-        } else {
-            sessionsToday = 0
-            savedSessionsToday = 0
-            lastSessionDate = todayString
-        }
-    }
-    
-    private var todayString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: Date())
     }
     
     // MARK: - Notifications
@@ -199,7 +172,7 @@ class TimerManager: ObservableObject {
     private func sendCompletionNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Time's Up!"
-        content.body = "Session #\(sessionsToday) complete. Great work!"
+        content.body = "Great work! Take a break."
         content.sound = .default
         
         let request = UNNotificationRequest(

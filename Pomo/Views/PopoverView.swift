@@ -9,10 +9,6 @@ struct PopoverView: View {
             // Timer Display
             TimerRingView()
                 .padding(.top, 24)
-                .padding(.bottom, 16)
-            
-            // Session Counter
-            SessionCounterView()
                 .padding(.bottom, 20)
             
             Divider()

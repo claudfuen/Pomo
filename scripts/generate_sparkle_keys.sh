@@ -73,3 +73,4 @@ echo "3. To sign a release DMG, run:"
 echo "   ./scripts/bin/sign_update path/to/Pomo.dmg"
 echo ""
 
+

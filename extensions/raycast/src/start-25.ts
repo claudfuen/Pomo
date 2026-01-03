@@ -9,3 +9,4 @@ export default async function Command() {
     await showHUD("25 min timer started");
   }
 }
+

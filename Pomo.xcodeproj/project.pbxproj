@@ -17,7 +17,6 @@
 		009 /* TimerRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 109 /* TimerRingView.swift */; };
 		011 /* PresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 111 /* PresetsView.swift */; };
 		012 /* CustomTimeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112 /* CustomTimeView.swift */; };
-		013 /* SessionCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113 /* SessionCounterView.swift */; };
 		014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 114 /* Assets.xcassets */; };
 		015 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 200 /* HotKey */; };
 		016 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 201 /* Sparkle */; };
@@ -36,7 +35,6 @@
 		109 /* TimerRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerRingView.swift; sourceTree = "<group>"; };
 		111 /* PresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetsView.swift; sourceTree = "<group>"; };
 		112 /* CustomTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTimeView.swift; sourceTree = "<group>"; };
-		113 /* SessionCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCounterView.swift; sourceTree = "<group>"; };
 		114 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		116 /* Pomo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pomo.entitlements; sourceTree = "<group>"; };
@@ -112,7 +110,6 @@
 				109 /* TimerRingView.swift */,
 				111 /* PresetsView.swift */,
 				112 /* CustomTimeView.swift */,
-				113 /* SessionCounterView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -222,7 +219,6 @@
 				009 /* TimerRingView.swift in Sources */,
 				011 /* PresetsView.swift in Sources */,
 				012 /* CustomTimeView.swift in Sources */,
-				013 /* SessionCounterView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

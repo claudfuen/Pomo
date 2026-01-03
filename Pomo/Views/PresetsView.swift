@@ -130,23 +130,27 @@ struct QuickStartButton: View {
                 
                 Spacer()
                 
-                if isActive {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.teal)
-                } else {
-                    // Edit button - separate from main button
-                    Button {
-                        isEditing = true
-                    } label: {
+                // Show checkmark when active, pencil on hover for editing
+                Button {
+                    isEditing = true
+                } label: {
+                    ZStack {
+                        // Checkmark (visible when active and not hovering)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.teal)
+                            .opacity(isActive && !isHovering ? 1 : 0)
+                        
+                        // Pencil (visible on hover or when not active)
                         Image(systemName: "pencil")
                             .font(.system(size: 11))
                             .foregroundStyle(isHovering ? .secondary : .tertiary)
+                            .opacity(!isActive || isHovering ? 1 : 0)
                     }
-                    .buttonStyle(.plain)
-                    .onHover { hovering in
-                        isHovering = hovering
-                    }
+                }
+                .buttonStyle(.plain)
+                .onHover { hovering in
+                    isHovering = hovering
                 }
             }
             .padding(.horizontal, 12)
