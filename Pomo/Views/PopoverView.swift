@@ -46,6 +46,8 @@ struct PopoverView: View {
 }
 
 struct FooterView: View {
+    @EnvironmentObject var updaterManager: UpdaterManager
+    
     var body: some View {
         HStack {
             Text("⌘⇧P to toggle")
@@ -53,6 +55,25 @@ struct FooterView: View {
                 .foregroundStyle(.secondary)
             
             Spacer()
+            
+            Button("Updates") {
+                updaterManager.checkForUpdates()
+            }
+            .buttonStyle(.plain)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .disabled(!updaterManager.canCheckForUpdates)
+            .onHover { isHovered in
+                if isHovered && updaterManager.canCheckForUpdates {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
+            
+            Text("•")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
             
             Button("Quit") {
                 NSApplication.shared.terminate(nil)
@@ -75,4 +96,5 @@ struct FooterView: View {
 #Preview {
     PopoverView()
         .environmentObject(TimerManager())
+        .environmentObject(UpdaterManager())
 }

@@ -74,3 +74,6 @@ __pycache__/
 .Python
 *.so
 
+# Sparkle tools (downloaded by generate_sparkle_keys.sh)
+scripts/bin/
+

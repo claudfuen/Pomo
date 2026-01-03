@@ -98,8 +98,40 @@ rm -f "$BUILD_DIR/Pomo-temp.dmg"
 
 # Show result
 DMG_SIZE=$(du -h "$DMG_PATH" | cut -f1)
+DMG_BYTES=$(stat -f%z "$DMG_PATH")
 echo ""
 echo -e "${GREEN}✅ Created: build/Pomo.dmg ($DMG_SIZE)${NC}"
+echo ""
+
+# Sign the DMG for Sparkle updates
+SIGN_UPDATE="$SCRIPT_DIR/bin/sign_update"
+if [ -x "$SIGN_UPDATE" ]; then
+    echo -e "${BLUE}🔐 Signing DMG for Sparkle updates...${NC}"
+    SIGNATURE=$("$SIGN_UPDATE" "$DMG_PATH" 2>&1 | grep -E '^sparkle:edSignature=' | cut -d'"' -f2)
+    
+    if [ -n "$SIGNATURE" ]; then
+        echo ""
+        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${GREEN}📋 APPCAST UPDATE INFORMATION${NC}"
+        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        echo "Add this to your appcast.xml <enclosure> tag:"
+        echo ""
+        echo "  sparkle:edSignature=\"$SIGNATURE\""
+        echo "  length=\"$DMG_BYTES\""
+        echo ""
+        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    else
+        echo -e "⚠️  Could not extract signature. Run manually:"
+        echo "   $SIGN_UPDATE $DMG_PATH"
+    fi
+else
+    echo -e "${BLUE}ℹ️  To enable Sparkle signing, run:${NC}"
+    echo "   ./scripts/generate_sparkle_keys.sh"
+    echo ""
+    echo "   Then re-run this script to sign the DMG."
+fi
+
 echo ""
 echo "To test: open $DMG_PATH"
 

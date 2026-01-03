@@ -3,11 +3,13 @@ import SwiftUI
 @main
 struct PomoApp: App {
     @StateObject private var timerManager = TimerManager()
+    @StateObject private var updaterManager = UpdaterManager()
     
     var body: some Scene {
         MenuBarExtra {
             PopoverView()
                 .environmentObject(timerManager)
+                .environmentObject(updaterManager)
         } label: {
             MenuBarLabel()
                 .environmentObject(timerManager)

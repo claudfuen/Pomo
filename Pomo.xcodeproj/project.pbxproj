@@ -20,6 +20,8 @@
 		013 /* SessionCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 113; };
 		014 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 114; };
 		015 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = 200; };
+		016 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 201; };
+		017 /* UpdaterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 117; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,7 @@
 		114 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		115 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		116 /* Pomo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pomo.entitlements; sourceTree = "<group>"; };
+		117 /* UpdaterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,6 +49,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				015 /* HotKey in Frameworks */,
+				016 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				105 /* SoundManager.swift */,
+				117 /* UpdaterManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -147,6 +152,7 @@
 			name = Pomo;
 			packageProductDependencies = (
 				200 /* HotKey */,
+				201 /* Sparkle */,
 			);
 			productName = Pomo;
 			productReference = 100 /* Pomo.app */;
@@ -178,6 +184,7 @@
 			mainGroup = 400;
 			packageReferences = (
 				800 /* XCRemoteSwiftPackageReference "HotKey" */,
+				801 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = 402 /* Products */;
 			projectDirPath = "";
@@ -209,6 +216,7 @@
 				003 /* TimerPreset.swift in Sources */,
 				004 /* TimerManager.swift in Sources */,
 				005 /* SoundManager.swift in Sources */,
+				017 /* UpdaterManager.swift in Sources */,
 				007 /* Color+Theme.swift in Sources */,
 				008 /* PopoverView.swift in Sources */,
 				009 /* TimerRingView.swift in Sources */,
@@ -427,6 +435,14 @@
 				minimumVersion = 0.2.0;
 			};
 		};
+		801 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -434,6 +450,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 800 /* XCRemoteSwiftPackageReference "HotKey" */;
 			productName = HotKey;
+		};
+		201 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 801 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

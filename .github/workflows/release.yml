@@ -1,165 +1,154 @@
-name: Build, Sign & Release
+name: Release
 
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version tag (e.g., v1.0.0)'
-        required: true
-
-env:
-  APP_NAME: Pomo
-  SCHEME: Pomo
-  PROJECT: Pomo.xcodeproj
-
-permissions:
-  contents: write
 
 jobs:
-  build-sign-release:
-    runs-on: macos-14
+  build-and-release:
+    runs-on: macos-latest
     
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set version
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      
+      - name: Extract version from tag
         id: version
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
-          else
-            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Install Apple certificate
-        env:
-          CERTIFICATE_P12: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
-          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          TAG=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+          # Calculate build number from git tags count
+          BUILD_NUM=$(git tag | wc -l | tr -d ' ')
+          echo "build=$BUILD_NUM" >> $GITHUB_OUTPUT
+      
+      - name: Update version in Info.plist
         run: |
-          # Create variables
-          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
-          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
-
-          # Decode certificate from base64
-          printf '%s' "$CERTIFICATE_P12" | base64 -D > $CERTIFICATE_PATH
-
-          # Create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-
-          # Import certificate to keychain
-          security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
-          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security list-keychain -d user -s $KEYCHAIN_PATH
-
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${{ steps.version.outputs.version }}" Pomo/Info.plist
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ steps.version.outputs.build }}" Pomo/Info.plist
+      
       - name: Build app
         run: |
-          xcodebuild -project $PROJECT \
-            -scheme $SCHEME \
+          xcodebuild -project Pomo.xcodeproj \
+            -scheme Pomo \
             -configuration Release \
             -derivedDataPath build/DerivedData \
             MACOSX_DEPLOYMENT_TARGET=14.0 \
-            CODE_SIGN_IDENTITY="Developer ID Application: ${{ secrets.DEVELOPER_NAME }} (${{ secrets.TEAM_ID }})" \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=${{ secrets.TEAM_ID }} \
-            OTHER_CODE_SIGN_FLAGS="--options runtime" \
             build
-
-      - name: Copy app to build folder
-        run: |
+          
+          # Copy app to build directory
           mkdir -p build
-          cp -R "build/DerivedData/Build/Products/Release/$APP_NAME.app" "build/$APP_NAME.app"
-
-      - name: Re-sign app with hardened runtime
+          cp -R "build/DerivedData/Build/Products/Release/Pomo.app" build/
+      
+      - name: Download Sparkle tools
         run: |
-          # Re-sign the app with hardened runtime to ensure it's properly signed
-          codesign --force --deep --options runtime \
-            --sign "Developer ID Application: ${{ secrets.DEVELOPER_NAME }} (${{ secrets.TEAM_ID }})" \
-            "build/$APP_NAME.app"
-          
-          # Verify signing
-          codesign --verify --deep --strict --verbose=2 "build/$APP_NAME.app"
-          echo "✅ Code signing verified"
-
-      - name: Notarize app
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          TEAM_ID: ${{ secrets.TEAM_ID }}
-          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-        run: |
-          # Create ZIP for notarization
-          ditto -c -k --keepParent "build/$APP_NAME.app" "build/$APP_NAME.zip"
-
-          # Submit for notarization and capture submission ID
-          SUBMIT_OUTPUT=$(xcrun notarytool submit "build/$APP_NAME.zip" \
-            --apple-id "$APPLE_ID" \
-            --team-id "$TEAM_ID" \
-            --password "$APP_SPECIFIC_PASSWORD" \
-            --wait 2>&1) || true
-          
-          echo "$SUBMIT_OUTPUT"
-          
-          # Extract submission ID and check status
-          SUBMISSION_ID=$(echo "$SUBMIT_OUTPUT" | grep "id:" | head -1 | awk '{print $2}')
-          
-          if echo "$SUBMIT_OUTPUT" | grep -q "status: Invalid"; then
-            echo "❌ Notarization failed! Fetching log..."
-            xcrun notarytool log "$SUBMISSION_ID" \
-              --apple-id "$APPLE_ID" \
-              --team-id "$TEAM_ID" \
-              --password "$APP_SPECIFIC_PASSWORD"
-            exit 1
-          fi
-
-          # Staple the notarization ticket
-          xcrun stapler staple "build/$APP_NAME.app"
-
+          SPARKLE_VERSION="2.6.4"
+          curl -L "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" -o sparkle.tar.xz
+          mkdir -p sparkle-tools
+          tar -xf sparkle.tar.xz -C sparkle-tools
+      
       - name: Create DMG
         run: |
-          # Install create-dmg
-          brew install create-dmg
-
+          # Create DMG directory
+          mkdir -p build/dmg
+          cp -R build/Pomo.app build/dmg/
+          ln -s /Applications build/dmg/Applications
+          
           # Create DMG
-          create-dmg \
-            --volname "$APP_NAME" \
-            --volicon "Pomo/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" \
-            --window-pos 200 120 \
-            --window-size 600 400 \
-            --icon-size 100 \
-            --icon "$APP_NAME.app" 150 185 \
-            --app-drop-link 450 185 \
-            --hide-extension "$APP_NAME.app" \
-            "build/$APP_NAME.dmg" \
-            "build/$APP_NAME.app" || true
-
-          # Notarize the DMG too
-          xcrun notarytool submit "build/$APP_NAME.dmg" \
-            --apple-id "${{ secrets.APPLE_ID }}" \
-            --team-id "${{ secrets.TEAM_ID }}" \
-            --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
-            --wait
-
-          xcrun stapler staple "build/$APP_NAME.dmg"
-
+          hdiutil create -volname "Pomo" \
+            -srcfolder build/dmg \
+            -ov -format UDZO \
+            -imagekey zlib-level=9 \
+            build/Pomo.dmg
+          
+          # Clean up
+          rm -rf build/dmg
+      
+      - name: Sign DMG with Sparkle
+        id: sign
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          # Write private key to temp file
+          echo "$SPARKLE_PRIVATE_KEY" > /tmp/sparkle_private_key
+          
+          # Sign the DMG
+          SIGN_OUTPUT=$(./sparkle-tools/bin/sign_update build/Pomo.dmg --ed-key-file /tmp/sparkle_private_key)
+          
+          # Extract signature
+          SIGNATURE=$(echo "$SIGN_OUTPUT" | grep -oE 'sparkle:edSignature="[^"]+"' | cut -d'"' -f2)
+          LENGTH=$(stat -f%z build/Pomo.dmg)
+          
+          echo "signature=$SIGNATURE" >> $GITHUB_OUTPUT
+          echo "length=$LENGTH" >> $GITHUB_OUTPUT
+          
+          # Clean up
+          rm /tmp/sparkle_private_key
+      
+      - name: Update appcast.xml
+        run: |
+          DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD="${{ steps.version.outputs.build }}"
+          SIGNATURE="${{ steps.sign.outputs.signature }}"
+          LENGTH="${{ steps.sign.outputs.length }}"
+          
+          # Create new item entry
+          NEW_ITEM=$(cat <<EOF
+    <item>
+      <title>Version ${VERSION}</title>
+      <description>
+        <![CDATA[
+          <h2>What's New in ${VERSION}</h2>
+          <p>See the <a href="https://github.com/claudfuen/Pomo/releases/tag/v${VERSION}">release notes</a> for details.</p>
+        ]]>
+      </description>
+      <pubDate>${DATE}</pubDate>
+      <sparkle:version>${BUILD}</sparkle:version>
+      <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure 
+        url="https://github.com/claudfuen/Pomo/releases/download/v${VERSION}/Pomo.dmg"
+        sparkle:edSignature="${SIGNATURE}"
+        length="${LENGTH}"
+        type="application/octet-stream"/>
+    </item>
+EOF
+)
+          
+          # Insert new item after the comment block (before existing items)
+          # Using awk to insert after the --> line
+          awk -v new_item="$NEW_ITEM" '
+            /^[[:space:]]*-->/ { print; print ""; print new_item; next }
+            { print }
+          ' appcast.xml > appcast_new.xml
+          
+          mv appcast_new.xml appcast.xml
+      
+      - name: Commit updated appcast
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add appcast.xml
+          git commit -m "Update appcast for v${{ steps.version.outputs.version }}"
+          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ env.APP_NAME }} ${{ steps.version.outputs.VERSION }}
+          name: Pomo v${{ steps.version.outputs.version }}
           draft: false
           prerelease: false
-          files: build/${{ env.APP_NAME }}.dmg
+          files: build/Pomo.dmg
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cleanup keychain
-        if: always()
-        run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
-
