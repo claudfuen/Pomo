@@ -59,20 +59,21 @@ jobs:
       
       - name: Create DMG
         run: |
-          # Create DMG directory
-          mkdir -p build/dmg
-          cp -R build/Pomo.app build/dmg/
-          ln -s /Applications build/dmg/Applications
+          # Install create-dmg
+          brew install create-dmg
           
-          # Create DMG
-          hdiutil create -volname "Pomo" \
-            -srcfolder build/dmg \
-            -ov -format UDZO \
-            -imagekey zlib-level=9 \
-            build/Pomo.dmg
-          
-          # Clean up
-          rm -rf build/dmg
+          # Create styled DMG
+          create-dmg \
+            --volname "Pomo" \
+            --volicon "Pomo/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "Pomo.app" 150 185 \
+            --app-drop-link 450 185 \
+            --hide-extension "Pomo.app" \
+            "build/Pomo.dmg" \
+            "build/Pomo.app" || true
       
       - name: Sign DMG with Sparkle
         id: sign
