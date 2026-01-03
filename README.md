@@ -22,7 +22,9 @@
 </p>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Pomo Demo" width="320" />
+  <img src="assets/screenshot-main.png" alt="Pomo Main" width="280" />
+  &nbsp;&nbsp;
+  <img src="assets/screenshot-menubar.png" alt="Pomo Menu Bar" width="420" />
 </p>
 
 ---
