@@ -199,7 +199,22 @@ Contributions are welcome! Here's how:
 
 ## Releasing
 
-To release a new version:
+### Version Numbers
+
+Use [semantic versioning](https://semver.org/) (`vMAJOR.MINOR.PATCH`):
+
+| Change Type | Example | When to Use |
+|-------------|---------|-------------|
+| **PATCH** | `v1.0.0` → `v1.0.1` | Bug fixes, small tweaks |
+| **MINOR** | `v1.0.1` → `v1.1.0` | New features (backward compatible) |
+| **MAJOR** | `v1.1.0` → `v2.0.0` | Breaking changes, major redesign |
+
+Check the current version:
+```bash
+git tag --sort=-v:refname | head -1
+```
+
+### Create a Release
 
 ```bash
 git tag v1.0.1
