@@ -1,0 +1,137 @@
+name: Build, Sign & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+
+env:
+  APP_NAME: Pomo
+  SCHEME: Pomo
+  PROJECT: Pomo.xcodeproj
+
+jobs:
+  build-sign-release:
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Apple certificate
+        env:
+          CERTIFICATE_P12: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # Decode certificate from base64
+          echo -n "$CERTIFICATE_P12" | base64 --decode -o $CERTIFICATE_PATH
+
+          # Create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Build app
+        run: |
+          xcodebuild -project $PROJECT \
+            -scheme $SCHEME \
+            -configuration Release \
+            -derivedDataPath build/DerivedData \
+            MACOSX_DEPLOYMENT_TARGET=14.0 \
+            CODE_SIGN_IDENTITY="Developer ID Application: ${{ secrets.DEVELOPER_NAME }} (${{ secrets.TEAM_ID }})" \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=${{ secrets.TEAM_ID }} \
+            OTHER_CODE_SIGN_FLAGS="--options runtime" \
+            build
+
+      - name: Copy app to build folder
+        run: |
+          mkdir -p build
+          cp -R "build/DerivedData/Build/Products/Release/$APP_NAME.app" "build/$APP_NAME.app"
+
+      - name: Notarize app
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        run: |
+          # Create ZIP for notarization
+          ditto -c -k --keepParent "build/$APP_NAME.app" "build/$APP_NAME.zip"
+
+          # Submit for notarization
+          xcrun notarytool submit "build/$APP_NAME.zip" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password "$APP_SPECIFIC_PASSWORD" \
+            --wait
+
+          # Staple the notarization ticket
+          xcrun stapler staple "build/$APP_NAME.app"
+
+      - name: Create DMG
+        run: |
+          # Install create-dmg
+          brew install create-dmg
+
+          # Create DMG
+          create-dmg \
+            --volname "$APP_NAME" \
+            --volicon "Pomo/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "$APP_NAME.app" 150 185 \
+            --app-drop-link 450 185 \
+            --hide-extension "$APP_NAME.app" \
+            "build/$APP_NAME.dmg" \
+            "build/$APP_NAME.app" || true
+
+          # Notarize the DMG too
+          xcrun notarytool submit "build/$APP_NAME.dmg" \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --team-id "${{ secrets.TEAM_ID }}" \
+            --password "${{ secrets.APP_SPECIFIC_PASSWORD }}" \
+            --wait
+
+          xcrun stapler staple "build/$APP_NAME.dmg"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ env.APP_NAME }} ${{ steps.version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: build/${{ env.APP_NAME }}.dmg
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+
